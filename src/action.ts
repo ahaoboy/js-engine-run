@@ -2,14 +2,22 @@ import fs, { existsSync, readdirSync, } from "fs";
 import path from "path";
 import { exec, execSync } from "child_process";
 import info from "../info.json";
+import os from 'os'
+const CWD = process.env.GITHUB_WORKSPACE || process.cwd()
+const TEST_RUN_DIR = path.join(CWD, "__test_run__");
+const TEST_DIR = path.join(CWD, "./test");
+const OS = process.env.RUNNER_OS || os.platform()
+const ARCH = process.env.RUNNER_ARCH || os.arch()
 
-const TEST_RUN_DIR = path.join(__dirname, "../__test_run__");
-const TEST_DIR = path.join(__dirname, "../test");
+const OUTPUT_DIR = path.join(CWD, "output");
 
 if (!existsSync(TEST_RUN_DIR)) {
   fs.mkdirSync(TEST_RUN_DIR)
 }
 
+if (!existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR)
+}
 
 function execCmd(cmd: string, cwd?: string) {
   console.error(`cmd:`, { cmd, cwd });
@@ -24,8 +32,8 @@ function execCmd(cmd: string, cwd?: string) {
   });
 }
 
-
-const data: Record<string, Record<string, Record<string, string | number>>> = {};
+type DATA = Record<string, Record<string, Record<string, string | number>>>
+const data: DATA = {};
 
 function isMsys() {
   return !!process.env["MSYSTEM"];
@@ -66,8 +74,31 @@ function prepare() {
   }
 }
 
-const TIME_KEY = 'Time(ms)'
+const TIME_KEY = 'Time'
 const OUTPUT_KEY = 'output'
+
+function generateMd(data: DATA): string {
+  const engines = Object.keys(data)
+  const header = fs.readdirSync(TEST_RUN_DIR).map(i => i.split('.')[0])
+
+  console.log("engines:", engines, header);
+  const headerMd = "| | "  + header.join(" | ") + " |" + "\n" + "|" +
+    " --- |".repeat(header.length+1);
+
+  const rows: string[] = [headerMd]
+
+  for (const engine of engines) {
+    const row: string[] = [engine]
+
+    for (const i of header) {
+      row.push(((data[engine][i] || {})[OUTPUT_KEY] || '').toString())
+    }
+    console.log("row:", row, data[engine]);
+    rows.push('| ' + row.join(" | ") + " |");
+  }
+
+  return rows.join("\n");
+}
 
 async function main() {
 
@@ -110,6 +141,13 @@ async function main() {
 
   console.error(JSON.stringify(data));
   console.log(JSON.stringify(data));
+
+  const jsonPath = path.join(OUTPUT_DIR, `${OS}-${ARCH}.json`)
+  fs.writeFileSync(jsonPath, JSON.stringify(data))
+
+  const md = generateMd(data)
+  const mdPath = path.join(OUTPUT_DIR, `${OS}-${ARCH}.md`)
+  fs.writeFileSync(mdPath, md)
 }
 
 main();

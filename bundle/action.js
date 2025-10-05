@@ -282,10 +282,18 @@ var info_default = [
 ];
 
 // src/action.ts
-var TEST_RUN_DIR = import_path.default.join(__dirname, "../__test_run__");
-var TEST_DIR = import_path.default.join(__dirname, "../test");
+var import_os = __toESM(require("os"));
+var CWD = process.env.GITHUB_WORKSPACE || process.cwd();
+var TEST_RUN_DIR = import_path.default.join(CWD, "__test_run__");
+var TEST_DIR = import_path.default.join(CWD, "./test");
+var OS = process.env.RUNNER_OS || import_os.default.platform();
+var ARCH = process.env.RUNNER_ARCH || import_os.default.arch();
+var OUTPUT_DIR = import_path.default.join(CWD, "output");
 if (!(0, import_fs.existsSync)(TEST_RUN_DIR)) {
   import_fs.default.mkdirSync(TEST_RUN_DIR);
+}
+if (!(0, import_fs.existsSync)(OUTPUT_DIR)) {
+  import_fs.default.mkdirSync(OUTPUT_DIR);
 }
 function execCmd(cmd, cwd) {
   console.error(`cmd:`, { cmd, cwd });
@@ -331,8 +339,24 @@ function prepare() {
     import_fs.default.writeFileSync(output, s);
   }
 }
-var TIME_KEY = "Time(ms)";
+var TIME_KEY = "Time";
 var OUTPUT_KEY = "output";
+function generateMd(data2) {
+  const engines = Object.keys(data2);
+  const header = import_fs.default.readdirSync(TEST_RUN_DIR).map((i) => i.split(".")[0]);
+  console.log("engines:", engines, header);
+  const headerMd = "| | " + header.join(" | ") + " |\n|" + " --- |".repeat(header.length + 1);
+  const rows = [headerMd];
+  for (const engine of engines) {
+    const row = [engine];
+    for (const i of header) {
+      row.push(((data2[engine][i] || {})[OUTPUT_KEY] || "").toString());
+    }
+    console.log("row:", row, data2[engine]);
+    rows.push("| " + row.join(" | ") + " |");
+  }
+  return rows.join("\n");
+}
 async function main() {
   prepare();
   for (const item of info_default) {
@@ -366,5 +390,10 @@ async function main() {
   }
   console.error(JSON.stringify(data));
   console.log(JSON.stringify(data));
+  const jsonPath = import_path.default.join(OUTPUT_DIR, `${OS}-${ARCH}.json`);
+  import_fs.default.writeFileSync(jsonPath, JSON.stringify(data));
+  const md = generateMd(data);
+  const mdPath = import_path.default.join(OUTPUT_DIR, `${OS}-${ARCH}.md`);
+  import_fs.default.writeFileSync(mdPath, md);
 }
 main();
