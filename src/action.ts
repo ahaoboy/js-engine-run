@@ -31,6 +31,7 @@ function execCmd(cmd: string, cwd?: string) {
 
       let s = stripANSI(stdout?.trim() || "")
       if (cmd.includes("boa")) {
+        // boa will add last value at the end
         s = s.split('\n').slice(0, -1).join('\n').trim()
       }
       r(s);
