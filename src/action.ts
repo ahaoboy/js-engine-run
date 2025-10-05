@@ -3,6 +3,8 @@ import path from "path";
 import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
+import { stripANSI } from "bun";
+
 const CWD = process.env.GITHUB_WORKSPACE || process.cwd()
 const TEST_RUN_DIR = path.join(CWD, "__test_run__");
 const TEST_DIR = path.join(CWD, "./test");
@@ -23,11 +25,15 @@ function execCmd(cmd: string, cwd?: string) {
   console.error(`cmd:`, { cmd, cwd });
   return new Promise<string>((r) => {
     // exec(`bash -c "${cmd}"`, { cwd }, (err, stdout, stderr) => {
+    // goja output to stderr
     exec(cmd, { cwd }, (err, stdout, stderr) => {
       console.error("exec output", { err, stdout, stderr });
 
-      // goja output to stderr
-      r(stdout?.trim() || "");
+      let s = stripANSI(stdout?.trim() || "")
+      if (cmd.includes("boa")) {
+        s = s.split('\n').slice(0, -1).join('\n').trim()
+      }
+      r(s);
     });
   });
 }
@@ -81,9 +87,8 @@ function generateMd(data: DATA): string {
   const engines = Object.keys(data)
   const header = fs.readdirSync(TEST_RUN_DIR).map(i => i.split('.')[0])
 
-  console.log("engines:", engines, header);
-  const headerMd = "| | "  + header.join(" | ") + " |" + "\n" + "|" +
-    " --- |".repeat(header.length+1);
+  const headerMd = "| | " + header.join(" | ") + " |" + "\n" + "|" +
+    " --- |".repeat(header.length + 1);
 
   const rows: string[] = [headerMd]
 
@@ -91,9 +96,9 @@ function generateMd(data: DATA): string {
     const row: string[] = [engine]
 
     for (const i of header) {
-      row.push(((data[engine][i] || {})[OUTPUT_KEY] || '').toString())
+      const s = ((data[engine][i] || {})[OUTPUT_KEY] || '').toString().replaceAll('\n', '<br>')
+      row.push(s)
     }
-    console.log("row:", row, data[engine]);
     rows.push('| ' + row.join(" | ") + " |");
   }
 
