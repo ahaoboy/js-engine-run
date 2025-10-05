@@ -19,15 +19,21 @@ esac
 
 skip_list=("goja")
 
+CWD="$(cd "$(dirname "$0")" && pwd)"
+
 run_test() {
     local name="$1"
-    local subcmd="$1"
+    local subcmd="$2"
+
+    echo run_test $name $subcmd
+
     if [ -z "$name" ]; then
         return 1
     fi
 
     local program_path
     program_path=$(which "$name" 2>/dev/null)
+    echo program_path $program_path
     if [ -z "$program_path" ]; then
         return 1
     fi
@@ -35,7 +41,18 @@ run_test() {
     local dir
     dir=$(dirname "$program_path")
 
-    (cd "$dir" && ./"$name" "$subcmd" $JS_PATH)
+    for file in "__test_run__"/*.js; do
+        if [ ! -f "$file" ]; then
+            continue
+        fi
+
+      local filename=$(basename "$file")
+      local output_file="$CWD/output/${filename%.*}.txt"
+      (cd "$dir" && ./"$name" $subcmd $file > "$output_file" 2>&1) || true
+
+      echo $name $subcmd $file
+
+    done
 }
 
 prepare() {
@@ -89,7 +106,11 @@ prepare() {
 jq -c '.[]' "$json_file" | while IFS= read -r item; do
   name=$(echo "$item" | jq -r '.bin // .name')
   subcmd=$(echo "$item" | jq -r '.subcmd // ""')
-  echo $name $subcmd $JS_PATH
+  echo $name $subcmd
 
   prepare
+
+  mkdir -p output
+
+  run_test $name $subcmd
 done

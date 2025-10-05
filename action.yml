@@ -15,7 +15,6 @@ inputs:
 
 runs:
   using: 'composite'
-
   steps:
       - uses: oven-sh/setup-bun@v2
         with:
@@ -34,15 +33,9 @@ runs:
           distribution: "oracle"
           java-version: "25"
 
-      # - uses: msys2/setup-msys2@v2
-      #   if: matrix.os == 'windows-latest'
-      #   with:
-      #     msystem: MINGW64
-      #     path-type: inherit
-
       - name: install dep
         shell: bash
-        if: matrix.os == 'ubuntu-24.04'
+        if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt install -y libcurl4-openssl-dev libssl-dev zlib1g-dev
 
@@ -92,15 +85,11 @@ runs:
 
       - name: install ladybird
         shell: bash
-        if: matrix.os == 'ubuntu-24.04' || matrix.os == 'macos-15'
+        if: ${{ runner.os != 'Windows' }}
         run: |
           ei https://github.com/ahaoboy/ladybird-js-build
           mv ~/.ei/js ~/.ei/ladybird
-      # - name: install by npm
-      #   run: |
-      #     # npm i -g bare
-      #     npm i -g @engine262/engine262
-      #     npm i -g quickjs-emscripten-cli
+
       - name: install by bun
         shell: bash
         run: |
@@ -109,7 +98,7 @@ runs:
 
       - name: install unix
         shell: bash
-        if: "!startsWith(matrix.os, 'windows')"
+        if: ${{ runner.os != 'Windows' }}
         run: |
           ei https://github.com/ahaoboy/primjs-build
           mv ~/.ei/qjs ~/.ei/primjs
@@ -134,7 +123,7 @@ runs:
 
       - name: Set JavaScriptCore environment variable only on macOS
         shell: bash
-        if: startsWith(matrix.os, 'macos')
+        if: ${{ runner.os == 'macOS' }}
         run: |
           JSC_DIR="$(dirname "$(which jsc)")"
           echo $JSC_DIR
@@ -147,6 +136,6 @@ runs:
       - name: run
         shell: bash
         run: |
-          bun run --silent build
-          rm -rf ${{ matrix.name }}.json
-          bun run --silent update > ${{ matrix.name }}.json
+          npm run --silent build
+          rm -rf ${{ runner.os }}.json
+          npm run --silent update > ${{ runner.os }}.json
