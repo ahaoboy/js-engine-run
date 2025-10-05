@@ -128,10 +128,10 @@ runs:
         echo $JSC_DIR
         echo "DYLD_FRAMEWORK_PATH=$JSC_DIR" >> "$GITHUB_ENV"
         echo "DYLD_LIBRARY_PATH=$JSC_DIR" >> "$GITHUB_ENV"
-    - name: strip
-      shell: bash
-      run: |
-        bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
+    # - name: strip
+    #   shell: bash
+    #   run: |
+    #     bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
     - name: run
       shell: bash
       run: |
