@@ -133,6 +133,12 @@ runs:
     #   run: |
     #     bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
     - name: run
+      if: ${{ runner.os != 'Windows' }}
       shell: bash
+      run: |
+        bun ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
+    - name: run
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
       run: |
         bun ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
