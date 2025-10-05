@@ -139,6 +139,7 @@ runs:
         bun ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
     - name: run
       if: ${{ runner.os == 'Windows' }}
-      shell: pwsh
+      shell: bash
       run: |
-        bun ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
+        action_path=$(echo "${{ github.action_path }}" | sed 's#\\#/#g' | sed 's#^\([A-Za-z]\):#/\L\1#')
+        bun "$action_path/bundle/action.js" > "${{ runner.os }}.json"
