@@ -1,0 +1,32 @@
+name: Release new action version
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update_tag:
+    name: Update the major tag to include the ${{ github.ref }} changes
+    # Remember to configure the releaseNewActionVersion environment with required approvers in the repository settings
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Tag Name
+        id: get_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Print Tag Name
+        run: echo "The tag name is $TAG_NAME"
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update the ${{ env.TAG_NAME }} tag
+        uses: actions/publish-action@v0.3.0
+        with:
+          source-tag: ${{ env.TAG_NAME }}
