@@ -283,6 +283,7 @@ var info_default = [
 
 // src/action.ts
 var import_os = __toESM(require("os"));
+var import_bun = require("bun");
 var CWD = process.env.GITHUB_WORKSPACE || process.cwd();
 var TEST_RUN_DIR = import_path.default.join(CWD, "__test_run__");
 var TEST_DIR = import_path.default.join(CWD, "./test");
@@ -300,7 +301,11 @@ function execCmd(cmd, cwd) {
   return new Promise((r) => {
     (0, import_child_process.exec)(cmd, { cwd }, (err, stdout, stderr) => {
       console.error("exec output", { err, stdout, stderr });
-      r(stdout?.trim() || "");
+      let s = (0, import_bun.stripANSI)(stdout?.trim() || "");
+      if (cmd.includes("boa")) {
+        s = s.split("\n").slice(0, -1).join("\n").trim();
+      }
+      r(s);
     });
   });
 }
@@ -344,15 +349,14 @@ var OUTPUT_KEY = "output";
 function generateMd(data2) {
   const engines = Object.keys(data2);
   const header = import_fs.default.readdirSync(TEST_RUN_DIR).map((i) => i.split(".")[0]);
-  console.log("engines:", engines, header);
   const headerMd = "| | " + header.join(" | ") + " |\n|" + " --- |".repeat(header.length + 1);
   const rows = [headerMd];
   for (const engine of engines) {
     const row = [engine];
     for (const i of header) {
-      row.push(((data2[engine][i] || {})[OUTPUT_KEY] || "").toString());
+      const s = ((data2[engine][i] || {})[OUTPUT_KEY] || "").toString().replaceAll("\n", "<br>");
+      row.push(s);
     }
-    console.log("row:", row, data2[engine]);
     rows.push("| " + row.join(" | ") + " |");
   }
   return rows.join("\n");

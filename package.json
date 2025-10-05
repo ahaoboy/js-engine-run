@@ -24,7 +24,7 @@
   "scripts": {
     "format": "deno fmt --ignore=node_modules,dist,bundle,target --indent-width=2 --no-semicolons --single-quote",
     "build": "tsc -p tsconfig.build.json && npm run bundle",
-    "bundle": "esbuild --target=node20 --outdir=bundle --bundle --platform=node --format=cjs src/action.ts"
+    "bundle": "esbuild --target=node20 --outdir=bundle --bundle --platform=node --format=cjs src/action.ts --external:bun"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
