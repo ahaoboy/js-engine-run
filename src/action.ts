@@ -3,7 +3,7 @@ import path from "path";
 import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
-import { stripANSI } from "bun";
+// import { stripANSI } from "bun";
 import { getInput, getMultilineInput } from "./tool";
 
 const INPUT_TEST = getInput("test") || "test"
@@ -38,7 +38,8 @@ function execCmd(cmd: string, cwd?: string) {
     exec(cmd, { cwd }, (err, stdout, stderr) => {
       console.error("exec output", { err, stdout, stderr });
 
-      let s = stripANSI(stdout?.trim() || "")
+      // let s = stripANSI(stdout?.trim() || "")
+      let s = (stdout?.trim() || "")
       if (cmd.includes("boa")) {
         // boa will add last value at the end
         s = s.split('\n').slice(0, -1).join('\n').trim()

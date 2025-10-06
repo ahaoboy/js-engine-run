@@ -138,10 +138,12 @@ runs:
       if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: |
-        bun ${{ github.action_path }}/src/action.ts > ${{ runner.os }}.json
+        # bun ${{ github.action_path }}/src/action.ts > ${{ runner.os }}.json
+        node ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
     - name: run
       if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: |
         action_path=$(echo "${{ github.action_path }}" | sed 's#\\#/#g' | sed 's#^\([A-Za-z]\):#/\L\1#')
-        bun "$action_path/src/action.ts" > "${{ runner.os }}.json"
+        # bun "$action_path/src/action.ts" > "${{ runner.os }}.json"
+        node "$action_path/bundle/action.js" > "${{ runner.os }}.json"
