@@ -138,7 +138,7 @@ runs:
       if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: |
-        bun ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
+        bun ${{ github.action_path }}/src/action.ts > ${{ runner.os }}.json
     - name: run
       if: ${{ runner.os == 'Windows' }}
       shell: bash

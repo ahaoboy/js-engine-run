@@ -32,6 +32,8 @@ jobs:
             deno
             v8
             mujs
+          test: test2
+          output: output2
       - name: update readme
         run: |
           ls -l
