@@ -284,12 +284,36 @@ var info_default = [
 // src/action.ts
 var import_os = __toESM(require("os"));
 var import_bun = require("bun");
+
+// src/tool.ts
+function getInput(name, options) {
+  const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
+  if (options && options.required && !val) {
+    throw new Error(`Input required and not supplied: ${name}`);
+  }
+  if (options && options.trimWhitespace === false) {
+    return val;
+  }
+  return val.trim();
+}
+function getMultilineInput(name, options) {
+  const inputs = getInput(name, options).replaceAll(",", "\n").split("\n").filter((x) => x !== "");
+  if (options && options.trimWhitespace === false) {
+    return inputs;
+  }
+  return inputs.map((input) => input.trim());
+}
+
+// src/action.ts
+var INPUT_TEST = getInput("test") || "test";
+var INPUT_OUTPUT = getInput("output") || "output";
+var INPUT_ENGINES = getMultilineInput("engines") || [];
 var CWD = process.env.GITHUB_WORKSPACE || process.cwd();
 var TEST_RUN_DIR = import_path.default.join(CWD, "__test_run__");
-var TEST_DIR = import_path.default.join(CWD, "./test");
+var TEST_DIR = import_path.default.join(CWD, INPUT_TEST);
 var OS = process.env.RUNNER_OS || import_os.default.platform();
 var ARCH = process.env.RUNNER_ARCH || import_os.default.arch();
-var OUTPUT_DIR = import_path.default.join(CWD, "output");
+var OUTPUT_DIR = import_path.default.join(CWD, INPUT_OUTPUT);
 if (!(0, import_fs.existsSync)(TEST_RUN_DIR)) {
   import_fs.default.mkdirSync(TEST_RUN_DIR);
 }
@@ -364,6 +388,9 @@ function generateMd(data2) {
 async function main() {
   prepare();
   for (const item of info_default) {
+    if (INPUT_ENGINES.length && !INPUT_ENGINES.includes(item.name)) {
+      continue;
+    }
     for (const test of (0, import_fs.readdirSync)(TEST_RUN_DIR)) {
       const name = test.split(".")[0];
       const testPath = import_path.default.join(TEST_RUN_DIR, test);
