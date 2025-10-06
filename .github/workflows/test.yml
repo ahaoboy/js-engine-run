@@ -26,7 +26,7 @@ jobs:
       - name: run js-engine-run
         uses: ./
         with:
-          engines: |
+          engines: |-
             bun
             node
             deno
