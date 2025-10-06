@@ -11,7 +11,9 @@ inputs:
   output:
     description: "the output test"
     required: false
-
+  engines:
+    description: "the engines"
+    required: false
 runs:
   using: "composite"
   steps:

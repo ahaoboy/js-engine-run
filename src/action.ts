@@ -4,14 +4,19 @@ import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
 import { stripANSI } from "bun";
+import { getInput, getMultilineInput } from "./tool";
+
+const INPUT_TEST = getInput("test") || "test"
+const INPUT_OUTPUT = getInput("output") || "output"
+const INPUT_ENGINES = getMultilineInput("engines") || []
 
 const CWD = process.env.GITHUB_WORKSPACE || process.cwd()
 const TEST_RUN_DIR = path.join(CWD, "__test_run__");
-const TEST_DIR = path.join(CWD, "./test");
+const TEST_DIR = path.join(CWD, INPUT_TEST);
 const OS = process.env.RUNNER_OS || os.platform()
 const ARCH = process.env.RUNNER_ARCH || os.arch()
 
-const OUTPUT_DIR = path.join(CWD, "output");
+const OUTPUT_DIR = path.join(CWD, INPUT_OUTPUT);
 
 if (!existsSync(TEST_RUN_DIR)) {
   fs.mkdirSync(TEST_RUN_DIR)
@@ -111,6 +116,9 @@ async function main() {
   prepare()
 
   for (const item of info) {
+    if (INPUT_ENGINES.length && !INPUT_ENGINES.includes(item.name)  ) {
+      continue
+    }
     for (const test of readdirSync(TEST_RUN_DIR)) {
       const name = test.split('.')[0]
       const testPath = path.join(TEST_RUN_DIR, test);
