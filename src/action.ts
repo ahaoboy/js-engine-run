@@ -12,6 +12,8 @@ const INPUT_ENGINES = getMultilineInput("engines") || []
 
 console.error(INPUT_ENGINES, INPUT_OUTPUT, INPUT_TEST)
 
+console.error(process.env)
+
 const CWD = process.env.GITHUB_WORKSPACE || process.cwd()
 const TEST_RUN_DIR = path.join(CWD, "__test_run__");
 const TEST_DIR = path.join(CWD, INPUT_TEST);
