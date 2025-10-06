@@ -10,9 +10,7 @@ const INPUT_TEST = getInput("test") || "test"
 const INPUT_OUTPUT = getInput("output") || "output"
 const INPUT_ENGINES = getMultilineInput("engines") || []
 
-console.error(INPUT_ENGINES, INPUT_OUTPUT, INPUT_TEST)
-
-console.error(process.env)
+console.error('INPUT: ', INPUT_ENGINES, INPUT_OUTPUT, INPUT_TEST)
 
 const CWD = process.env.GITHUB_WORKSPACE || process.cwd()
 const TEST_RUN_DIR = path.join(CWD, "__test_run__");
