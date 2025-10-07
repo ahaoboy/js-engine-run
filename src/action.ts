@@ -42,7 +42,7 @@ function execCmd(cmd: string, cwd?: string) {
         s = s.split('\n').slice(0. - 1).join('\n')
       }
       // goja output to stderr
-      if (['goja', 'goja.exe'].some(e => name.includes(e))) {
+      if (['goja', 'goja.exe'].some(e => name.endsWith(e))) {
         s = stderr?.trim() || ''
       }
       r(stripANSI(s));
