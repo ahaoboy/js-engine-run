@@ -126,33 +126,34 @@ async function main() {
       continue
     }
     for (const test of readdirSync(TEST_RUN_DIR)) {
-      const name = test.split('.')[0]
+      const testName = test.split('.')[0]
       const testPath = path.join(TEST_RUN_DIR, test);
 
       try {
-        const i = item.bin || item.name
+        const bin = item.bin || item.name
+        const name = item.name
         const { subcmd = "" } = item
-        const execPath = getExePath(i);
+        const execPath = getExePath(bin);
 
         const execDir = path.dirname(execPath);
 
-        if (!(i in data)) {
-          data[i] = {};
+        if (!(name in data)) {
+          data[name] = {};
         }
 
-        if (!(name in data[i])) {
-          data[i][name] = {};
+        if (!(testName in data[name])) {
+          data[name][testName] = {};
         }
 
         const startTime = Date.now();
         const out = await execCmd(
-          `${i} ${subcmd} ${testPath}`,
+          `${bin} ${subcmd} ${testPath}`,
           execDir,
         );
         const endTime = Date.now();
         console.error("out: ", out);
-        data[i][name][OUTPUT_KEY] = out
-        data[i][name][TIME_KEY] = ((endTime - startTime)) | 0;
+        data[name][testName][OUTPUT_KEY] = out
+        data[name][testName][TIME_KEY] = ((endTime - startTime)) | 0;
       } catch (e) {
         console.error("error:", e);
       }
