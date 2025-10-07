@@ -3,7 +3,7 @@ import path from "path";
 import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
-// import { stripANSI } from "bun";
+import { stripANSI } from "bun";
 import { getInput, getMultilineInput } from "./tool";
 
 const INPUT_TEST = getInput("test") || "test"
@@ -35,14 +35,17 @@ function execCmd(cmd: string, cwd?: string) {
     // goja output to stderr
     exec(cmd, { cwd }, (err, stdout, stderr) => {
       console.error("exec output", { err, stdout, stderr });
-
-      // let s = stripANSI(stdout?.trim() || "")
-      let s = (stdout?.trim() || "")
-      if (cmd.includes("boa")) {
-        // boa will add last value at the end
-        s = s.split('\n').slice(0, -1).join('\n').trim()
+      const name = cmd.split(" ")[0].replaceAll("\\",'/').split('/').at(-1) || ""
+      let s = stdout?.trim() || ''
+      // boa output last value
+      if (['boa', 'boa.exe'].some(e => name.endsWith(e))) {
+        s = s.split('\n').slice(0. - 1).join('\n')
       }
-      r(s);
+      // goja output to stderr
+      if (['goja', 'goja.exe'].some(e => name.includes(e))) {
+        s = stderr?.trim() || ''
+      }
+      r(stripANSI(s));
     });
   });
 }
