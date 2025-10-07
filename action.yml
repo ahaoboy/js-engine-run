@@ -137,15 +137,16 @@ runs:
     #     bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
 
     - name: run
-      if: ${{ runner.os != 'Windows' }}
       shell: bash
+      env:
+        INPUT_TEST: ${{ inputs.test }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_ENGINES: ${{ inputs.engines }}
       run: |
-        bun ${{ github.action_path }}/src/action.ts ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > ${{ runner.os }}.json
-        # node ${{ github.action_path }}/bundle/action.js ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > ${{ runner.os }}.json
-    - name: run
-      if: ${{ runner.os == 'Windows' }}
-      shell: bash
-      run: |
-        action_path=$(echo "${{ github.action_path }}" | sed 's#\\#/#g' | sed 's#^\([A-Za-z]\):#/\L\1#')
-        bun "$action_path/src/action.ts" ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }} > "${{ runner.os }}.json"
-        # node "$action_path/bundle/action.js" ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > "${{ runner.os }}.json"
+        path="${{ github.action_path }}"
+
+        if [[ "$path" == *:* ]]; then
+          path=$(echo "$path" | sed 's#\\#/#g' | sed 's#^\([A-Za-z]\):#/\L\1#')
+        fi
+
+        bun "$path/src/action.ts" > "${{ runner.os }}.json"

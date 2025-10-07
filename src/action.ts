@@ -4,11 +4,11 @@ import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
 import { stripANSI } from "bun";
+import { getInput, getMultilineInput } from "./tool";
 
-const ARGS = process.argv.slice(2);
-const INPUT_TEST = ARGS[0] || "test"
-const INPUT_OUTPUT = ARGS[1] || "output"
-const INPUT_ENGINES = ARGS[2].split(",") || []
+const INPUT_TEST = getInput("test") || "test"
+const INPUT_OUTPUT = getInput("output") || "output"
+const INPUT_ENGINES = getMultilineInput("engines") || []
 
 console.error('INPUT: ', INPUT_ENGINES, INPUT_OUTPUT, INPUT_TEST)
 
