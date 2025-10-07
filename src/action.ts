@@ -39,7 +39,7 @@ function execCmd(cmd: string, cwd?: string) {
       let s = stdout?.trim() || ''
       // boa output last value
       if (['boa', 'boa.exe'].some(e => name.endsWith(e))) {
-        s = s.split('\n').slice(0. - 1).join('\n')
+        s = s.split('\n').slice(0, - 1).join('\n')
       }
       // goja output to stderr
       if (['goja', 'goja.exe'].some(e => name.endsWith(e))) {
