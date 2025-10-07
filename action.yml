@@ -17,12 +17,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Run main script
-      shell: bash
-      run: |
-        echo "Test dir: ${{ inputs.test }}"
-        echo "Output: ${{ inputs.output }}"
-        echo "Engines: ${{ inputs.engines }}"
     - uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
@@ -136,20 +130,22 @@ runs:
         echo $JSC_DIR
         echo "DYLD_FRAMEWORK_PATH=$JSC_DIR" >> "$GITHUB_ENV"
         echo "DYLD_LIBRARY_PATH=$JSC_DIR" >> "$GITHUB_ENV"
+
     # - name: strip
     #   shell: bash
     #   run: |
     #     bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
+
     - name: run
       if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: |
-        bun ${{ github.action_path }}/src/action.ts > ${{ runner.os }}.json
-        # node ${{ github.action_path }}/bundle/action.js > ${{ runner.os }}.json
+        bun ${{ github.action_path }}/src/action.ts ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > ${{ runner.os }}.json
+        # node ${{ github.action_path }}/bundle/action.js ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > ${{ runner.os }}.json
     - name: run
       if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: |
         action_path=$(echo "${{ github.action_path }}" | sed 's#\\#/#g' | sed 's#^\([A-Za-z]\):#/\L\1#')
-        bun "$action_path/src/action.ts" > "${{ runner.os }}.json"
-        # node "$action_path/bundle/action.js" > "${{ runner.os }}.json"
+        bun "$action_path/src/action.ts" ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }} > "${{ runner.os }}.json"
+        # node "$action_path/bundle/action.js" ${{ inputs.test }} ${{ inputs.output }} ${{ inputs.engines }}  > "${{ runner.os }}.json"

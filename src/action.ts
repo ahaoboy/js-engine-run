@@ -4,11 +4,11 @@ import { exec, execSync } from "child_process";
 import info from "../info.json";
 import os from 'os'
 import { stripANSI } from "bun";
-import { getInput, getMultilineInput } from "./tool";
 
-const INPUT_TEST = getInput("test") || "test"
-const INPUT_OUTPUT = getInput("output") || "output"
-const INPUT_ENGINES = getMultilineInput("engines") || []
+const ARGS = process.argv.slice(2);
+const INPUT_TEST = ARGS[0] || "test"
+const INPUT_OUTPUT = ARGS[1] || "output"
+const INPUT_ENGINES = ARGS[2].split(",") || []
 
 console.error('INPUT: ', INPUT_ENGINES, INPUT_OUTPUT, INPUT_TEST)
 
@@ -35,7 +35,7 @@ function execCmd(cmd: string, cwd?: string) {
     // goja output to stderr
     exec(cmd, { cwd }, (err, stdout, stderr) => {
       console.error("exec output", { err, stdout, stderr });
-      const name = cmd.split(" ")[0].replaceAll("\\",'/').split('/').at(-1) || ""
+      const name = cmd.split(" ")[0].replaceAll("\\", '/').split('/').at(-1) || ""
       let s = stdout?.trim() || ''
       // boa output last value
       if (['boa', 'boa.exe'].some(e => name.endsWith(e))) {
