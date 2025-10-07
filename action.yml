@@ -17,6 +17,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Run main script
+      shell: bash
+      run: |
+        echo "Test dir: ${{ inputs.test }}"
+        echo "Output: ${{ inputs.output }}"
+        echo "Engines: ${{ inputs.engines }}"
     - uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
