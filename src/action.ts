@@ -45,7 +45,11 @@ function execCmd(cmd: string, cwd?: string) {
       if (['goja', 'goja.exe'].some(e => name.endsWith(e))) {
         s = stderr?.trim() || ''
       }
-      r(stripANSI(s));
+      s = stripANSI(s)
+      if (os.platform() === 'win32') {
+        s = s.replaceAll("\r\n", '\n')
+      }
+      r(s);
     });
   });
 }
