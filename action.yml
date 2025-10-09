@@ -17,125 +17,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: latest
-    - uses: actions/setup-node@v4
-      with:
-        node-version: latest
-    - uses: denoland/setup-deno@v2
-      with:
-        deno-version: latest
-    - uses: pnpm/action-setup@v4
-      with:
-        version: 10
-    - uses: actions/setup-java@v4
-      with:
-        distribution: "oracle"
-        java-version: "25"
-
-    - name: install dep
-      shell: bash
-      if: ${{ runner.os == 'Linux' }}
-      run: |
-        sudo apt install -y libcurl4-openssl-dev libssl-dev zlib1g-dev
-
-    - name: install easy-install
-      shell: bash
-      run: |
-        curl -fsSL https://raw.githubusercontent.com/easy-install/easy-install/main/install.sh | bash
-    - name: install from urls
-      shell: bash
-      run: |
-        which ei
-        urls=(
-          https://github.com/ahaoboy/easy-install/raw/refs/heads/main/dist-manifest/boa.json
-          https://github.com/ahaoboy/easy-install/raw/refs/heads/main/dist-manifest/llrt.json
-          https://github.com/ahaoboy/easy-install/raw/refs/heads/main/dist-manifest/hermes.json
-          https://github.com/ahaoboy/easy-install/raw/refs/heads/main/dist-manifest/xst.json
-          https://github.com/ahaoboy/txiki.js-build
-          https://github.com/ahaoboy/spidermonkey-build
-          https://github.com/ahaoboy/v8-build
-          https://github.com/ahaoboy/jerryscript-build
-          https://github.com/ahaoboy/mujs-build
-          https://github.com/ahaoboy/mujs-one
-          https://github.com/ahaoboy/mujs-pgo-build
-          https://github.com/ahaoboy/rquickjs-cli
-          https://github.com/ahaoboy/ChakraCore-build
-          https://github.com/ahaoboy/jsc-build
-          https://github.com/ahaoboy/goja-build
-          https://github.com/ahaoboy/kiesel-build
-          https://github.com/ahaoboy/mozjs-cli
-          https://github.com/ahaoboy/jint-cli
-          https://github.com/aalykiot/dune
-          https://github.com/ahaoboy/duktape-build
-          https://github.com/ahaoboy/njs-build
-          https://github.com/ahaoboy/spiderfire-build
-          https://github.com/ahaoboy/lo-build
-          https://github.com/trynova/nova
-          https://nightly.link/andrewmd5/hako-cli/workflows/build/llvm
-          https://github.com/ahaoboy/bare-build
-          https://github.com/ahaoboy/rqjs-pgo-build
-          https://github.com/ahaoboy/rhino-cli
-        )
-
-        for url in "${urls[@]}"; do
-          echo "install: $url"
-          ei "$url"
-        done
-
-    - name: install ladybird
-      shell: bash
-      if: ${{ runner.os != 'Windows' }}
-      run: |
-        ei https://github.com/ahaoboy/ladybird-js-build
-        mv ~/.ei/js ~/.ei/ladybird
-
-    - name: install by bun
-      shell: bash
-      run: |
-        bun i -g @engine262/engine262
-        bun i -g quickjs-emscripten-cli
-
-    - name: install unix
-      shell: bash
-      if: ${{ runner.os != 'Windows' }}
-      run: |
-        ei https://github.com/ahaoboy/primjs-build
-        mv ~/.ei/qjs ~/.ei/primjs
-
-        ei https://github.com/ringo/ringojs/releases/download/v4.0.0/ringojs-4.0.0.tar.gz
-
-    - name: install qjs-ng
-      shell: bash
-      run: |
-        ei https://github.com/quickjs-ng/quickjs
-        mv ~/.ei/qjs ~/.ei/qjs-ng
-        mv ~/.ei/qjsc ~/.ei/qjsc-ng
-    - name: install qjs
-      shell: bash
-      run: |
-        ei https://github.com/ahaoboy/quickjs-build
-    - name: install graaljs
-      shell: bash
-      run: |
-        ei https://github.com/ahaoboy/easy-install/raw/refs/heads/main/dist-manifest/graaljs.json
-        mv ~/.ei/graaljs/bin/js ~/.ei/graaljs/bin/graaljs
-
-    - name: Set JavaScriptCore environment variable only on macOS
-      shell: bash
-      if: ${{ runner.os == 'macOS' }}
-      run: |
-        JSC_DIR="$(dirname "$(which jsc)")"
-        echo $JSC_DIR
-        echo "DYLD_FRAMEWORK_PATH=$JSC_DIR" >> "$GITHUB_ENV"
-        echo "DYLD_LIBRARY_PATH=$JSC_DIR" >> "$GITHUB_ENV"
-
-    # - name: strip
-    #   shell: bash
-    #   run: |
-    #     bash ${{ github.action_path }}/strip.sh ${{ github.action_path }}/info.json
-
+    - uses: easy-install/js-engine-setup@v1
+      env:
+        # need for https://api.github.com/repos/denoland/deno/releases/latest
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: run
       shell: bash
       env:
@@ -143,6 +28,8 @@ runs:
         INPUT_OUTPUT: ${{ inputs.output }}
         INPUT_ENGINES: ${{ inputs.engines }}
       run: |
+        # curl -L -o "info.json" "https://raw.githubusercontent.com/ahaoboy/js-engine-setup/main/info.json"
+
         path="${{ github.action_path }}"
 
         if [[ "$path" == *:* ]]; then
