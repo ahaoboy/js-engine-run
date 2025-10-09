@@ -17,7 +17,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: easy-install/js-engine-setup@v1
+    - uses: ahaoboy/js-engine-setup@v1
     - name: run
       shell: bash
       env:
